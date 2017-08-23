@@ -11,7 +11,7 @@ CXXFLAGS=-Wall -O3
 LIBS=
 
 TEST_CXXFLAGS=$(CXXFLAGS)
-TEST_LIBS=$(LIBS)
+TEST_LIBS=$(LIBS) -lgtest -lgtest_main -lpthread 
 
 BINDIR=bin
 SRCDIR=src
@@ -55,7 +55,7 @@ $(TEST_TARGET): $(OBJS) $(TEST_OBJS)
 $(BUILDDIR)/%.o: $(TESTDIR)/%.$(SRCEXT)
 	@$(MKDIR) $(BUILDDIR)
 	@$(ECHO) "Compiling test" $@
-	@$(CXX) $(CXXFLAGS) $(INCLUDE) -c -o $@ $<
+	@$(CXX) $(TEST_CXXFLAGS) $(INCLUDE) -c -o $@ $<
 	
 $(TARGET): $(OBJS) $(BUILDDIR)/$(MAINFILE).o
 	@$(ECHO) "Linking"
