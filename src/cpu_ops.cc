@@ -69,6 +69,12 @@ void CPU::op_rlc(uint8_t& reg){
 	set_flag(FLAG_CARRY, c);
 }
 
+void CPU::op_rlc(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_rlc(val);
+	m_mmu->write_byte(addr, val);
+}
+
 void CPU::op_add(uint8_t& reg, uint8_t val){
 	uint8_t res = reg + val;
 
@@ -117,6 +123,12 @@ void CPU::op_rrc(uint8_t& reg){
 	set_flag(FLAG_CARRY, c);
 }
 
+void CPU::op_rrc(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_rrc(val);
+	m_mmu->write_byte(addr, val);
+}
+
 void CPU::op_rl(uint8_t& reg){
 	bool c = reg >> 7;
 
@@ -126,6 +138,12 @@ void CPU::op_rl(uint8_t& reg){
 	set_flag(FLAG_SUBTRACT, 0);
 	set_flag(FLAG_HALF_CARRY, 0);
 	set_flag(FLAG_CARRY, c);
+}
+
+void CPU::op_rl(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_rl(val);
+	m_mmu->write_byte(addr, val);
 }
 
 void CPU::op_jr(int8_t addr, bool condition){
@@ -146,6 +164,12 @@ void CPU::op_rr(uint8_t& reg){
 	set_flag(FLAG_CARRY, c);
 }
 
+void CPU::op_rr(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_rr(val);
+	m_mmu->write_byte(addr, val);
+}
+
 void CPU::op_ldi(uint16_t& addr, uint8_t val){
 	op_ld(addr, val);
 	op_inc(addr);
@@ -156,7 +180,7 @@ void CPU::op_ldi(uint8_t& reg, uint16_t& addr){
 	op_inc(addr);
 }
 
-void CPU::op_da(uint8_t& reg){
+void CPU::op_daa(uint8_t& reg){
 	uint8_t res = reg;
 
 	bool h = get_flag(FLAG_HALF_CARRY);
@@ -356,3 +380,102 @@ void CPU::op_ei(){
 		interrupt_master_pending = true;
 	}
 }
+
+void CPU::op_swap(uint8_t& reg){
+	reg = ((reg & 0xF) << 4) | ((reg & 0xF0) >> 4);
+
+	set_flag(FLAG_ZERO, reg == 0);
+	set_flag(FLAG_SUBTRACT, 0);
+	set_flag(FLAG_HALF_CARRY, 0);
+	set_flag(FLAG_CARRY, 0);
+}
+
+void CPU::op_swap(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_swap(val);
+	m_mmu->write_byte(addr, val);
+}
+
+void CPU::op_sla(uint8_t& reg){
+	bool c = reg >> 7;
+
+	reg = reg << 1;
+
+	set_flag(FLAG_ZERO, reg == 0);
+	set_flag(FLAG_SUBTRACT, 0);
+	set_flag(FLAG_HALF_CARRY, 0);
+	set_flag(FLAG_CARRY, c);
+}
+
+void CPU::op_sla(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_sla(val);
+	m_mmu->write_byte(addr, val);
+}
+
+void CPU::op_sra(uint8_t& reg){
+	bool c = reg & 1;
+
+	reg = (reg >> 1) | (reg & 0x80);
+
+	set_flag(FLAG_ZERO, reg == 0);
+	set_flag(FLAG_SUBTRACT, 0);
+	set_flag(FLAG_HALF_CARRY, 0);
+	set_flag(FLAG_CARRY, c);
+}
+
+void CPU::op_sra(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_sra(val);
+	m_mmu->write_byte(addr, val);
+}
+
+void CPU::op_srl(uint8_t& reg){
+	bool c = reg & 1;
+
+	reg = reg >> 1;
+
+	set_flag(FLAG_ZERO, reg == 0);
+	set_flag(FLAG_SUBTRACT, 0);
+	set_flag(FLAG_HALF_CARRY, 0);
+	set_flag(FLAG_CARRY, c);
+}
+
+void CPU::op_srl(uint16_t addr){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_srl(val);
+	m_mmu->write_byte(addr, val);
+}
+
+void CPU::op_bit(uint8_t& reg, uint8_t bit){	
+	set_flag(FLAG_ZERO, (reg & bit) == 0);
+	set_flag(FLAG_SUBTRACT, 0);
+	set_flag(FLAG_HALF_CARRY, 1);
+}
+
+void CPU::op_bit(uint16_t addr, uint8_t bit){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_bit(val, bit);
+	m_mmu->write_byte(addr, val);
+}
+
+void CPU::op_set(uint8_t& reg, uint8_t bit){
+	reg |= bit;
+}
+
+void CPU::op_set(uint16_t addr, uint8_t bit){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_set(val, bit);
+	m_mmu->write_byte(addr, val);
+}
+
+void CPU::op_res(uint8_t& reg, uint8_t bit){
+	reg &= ~bit;
+}
+
+void CPU::op_res(uint16_t addr, uint8_t bit){
+	uint8_t val = m_mmu->read_byte(addr);
+	op_res(val, bit);
+	m_mmu->write_byte(addr, val);
+}
+

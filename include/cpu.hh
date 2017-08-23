@@ -71,18 +71,22 @@ private:
 	void op_dec(uint16_t& reg);
 	void op_dec_mem(uint16_t addr);
 	void op_rlc(uint8_t& reg);
+	void op_rlc(uint16_t addr);
 	void op_add(uint8_t& reg, uint8_t val);
 	void op_add(uint8_t& reg, uint16_t addr);
 	void op_add(uint16_t& reg, uint16_t val);
 	void op_add(uint16_t& reg, int8_t val);
 	void op_stop();
 	void op_rrc(uint8_t& reg);
+	void op_rrc(uint16_t addr);
 	void op_rl(uint8_t& reg);
+	void op_rl(uint16_t addr);
 	void op_jr(int8_t addr, bool condition);
 	void op_rr(uint8_t& reg);
+	void op_rr(uint16_t addr);
 	void op_ldi(uint16_t& addr, uint8_t val);
 	void op_ldi(uint8_t& reg, uint16_t& addr);
-	void op_da(uint8_t& reg);
+	void op_daa(uint8_t& reg);
 	void op_cpl(uint8_t& reg);
 	void op_ldd(uint16_t& addr, uint8_t val);
 	void op_ldd(uint8_t& reg, uint16_t& addr);
@@ -115,6 +119,21 @@ private:
 	void op_di();
 	void op_ldhl(uint16_t& reg, int8_t addr);
 	void op_ei();
+
+	void op_swap(uint8_t& reg);
+	void op_swap(uint16_t addr);
+	void op_sla(uint8_t& reg);
+	void op_sla(uint16_t addr);
+	void op_sra(uint8_t& reg);
+	void op_sra(uint16_t addr);
+	void op_srl(uint8_t& reg);
+	void op_srl(uint16_t addr);
+	void op_bit(uint8_t& reg, uint8_t bit);
+	void op_bit(uint16_t addr, uint8_t bit);
+	void op_set(uint8_t& reg, uint8_t bit);
+	void op_set(uint16_t addr, uint8_t bit);
+	void op_res(uint8_t& reg, uint8_t bit);
+	void op_res(uint16_t addr, uint8_t bit);
 };
 
 #endif
