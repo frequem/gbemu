@@ -2,4 +2,4 @@
 *.gbc
 *.sav
 build/
-gbemu
+bin/
