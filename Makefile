@@ -44,6 +44,11 @@ distclean: clean
 	@$(RM) $(BINDIR)
 	@$(ECHO) "Removed binaries"
 
+testclean:
+	@$(RM) $(TEST_OBJS)
+	@$(ECHO) "Removed only test objs"
+	
+
 test: $(TEST_TARGET)
 
 $(TEST_TARGET): $(OBJS) $(TEST_OBJS)
