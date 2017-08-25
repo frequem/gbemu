@@ -7,5 +7,8 @@
 #include "cpu_ops/test_cpu_op_rlc.hh"
 #include "cpu_ops/test_cpu_op_add.hh"
 #include "cpu_ops/test_cpu_op_rrc.hh"
+#include "cpu_ops/test_cpu_op_rl.hh"
+#include "cpu_ops/test_cpu_op_jr.hh"
+#include "cpu_ops/test_cpu_op_rr.hh"
 
 #endif
