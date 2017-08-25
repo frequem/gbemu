@@ -6,5 +6,6 @@
 #include "cpu_ops/test_cpu_op_dec.hh"
 #include "cpu_ops/test_cpu_op_rlc.hh"
 #include "cpu_ops/test_cpu_op_add.hh"
+#include "cpu_ops/test_cpu_op_rrc.hh"
 
 #endif
