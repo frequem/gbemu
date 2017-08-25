@@ -181,7 +181,7 @@ void CPU::op_ldi(uint8_t& reg, uint16_t& addr){
 }
 
 void CPU::op_daa(uint8_t& reg){
-	uint8_t res = reg;
+	uint16_t res = reg;
 
 	bool h = get_flag(FLAG_HALF_CARRY);
 	bool c = get_flag(FLAG_CARRY);
@@ -194,7 +194,7 @@ void CPU::op_daa(uint8_t& reg){
 		if(c || (res > 0x9F)) res += 0x60;
 	}
 
-	reg = res;
+	reg = (uint8_t)res;
 
 	set_flag(FLAG_ZERO, res == 0);
 	set_flag(FLAG_HALF_CARRY, 0);
