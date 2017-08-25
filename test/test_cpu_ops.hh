@@ -17,5 +17,7 @@
 #include "cpu_ops/test_cpu_op_scf.hh"
 #include "cpu_ops/test_cpu_op_ccf.hh"
 #include "cpu_ops/test_cpu_op_halt.hh"
+#include "cpu_ops/test_cpu_op_and.hh"
+#include "cpu_ops/test_cpu_op_adc.hh"
 
 #endif
