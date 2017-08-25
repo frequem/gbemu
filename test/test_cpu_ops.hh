@@ -12,5 +12,10 @@
 #include "cpu_ops/test_cpu_op_rr.hh"
 #include "cpu_ops/test_cpu_op_ldi.hh"
 #include "cpu_ops/test_cpu_op_daa.hh"
+#include "cpu_ops/test_cpu_op_cpl.hh"
+#include "cpu_ops/test_cpu_op_ldd.hh"
+#include "cpu_ops/test_cpu_op_scf.hh"
+#include "cpu_ops/test_cpu_op_ccf.hh"
+#include "cpu_ops/test_cpu_op_halt.hh"
 
 #endif
