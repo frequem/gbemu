@@ -456,7 +456,6 @@ void CPU::op_bit(uint8_t& reg, uint8_t bit){
 void CPU::op_bit(uint16_t addr, uint8_t bit){
 	uint8_t val = m_mmu->read_byte(addr);
 	op_bit(val, bit);
-	m_mmu->write_byte(addr, val);
 }
 
 void CPU::op_set(uint8_t& reg, uint8_t bit){

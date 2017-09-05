@@ -39,5 +39,8 @@
 #include "cpu_ops/test_cpu_op_sla.hh"
 #include "cpu_ops/test_cpu_op_sra.hh"
 #include "cpu_ops/test_cpu_op_srl.hh"
+#include "cpu_ops/test_cpu_op_bit.hh"
+#include "cpu_ops/test_cpu_op_set.hh"
+#include "cpu_ops/test_cpu_op_res.hh"
 
 #endif
