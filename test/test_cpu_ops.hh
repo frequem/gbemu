@@ -33,7 +33,11 @@
 #include "cpu_ops/test_cpu_op_reti.hh"
 #include "cpu_ops/test_cpu_op_ldh.hh"
 #include "cpu_ops/test_cpu_op_di.hh"
-#include "cpu_ops/test_cpu_op_ei.hh"
 #include "cpu_ops/test_cpu_op_ldhl.hh"
+#include "cpu_ops/test_cpu_op_ei.hh"
+#include "cpu_ops/test_cpu_op_swap.hh"
+#include "cpu_ops/test_cpu_op_sla.hh"
+#include "cpu_ops/test_cpu_op_sra.hh"
+#include "cpu_ops/test_cpu_op_srl.hh"
 
 #endif
