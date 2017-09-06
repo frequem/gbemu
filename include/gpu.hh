@@ -7,19 +7,24 @@ class GPU;
 #include "mmu.hh"
 #include "screen.hh"
 
-const uint8_t LCDC_OPERATION_ENABLE = 	0b10000000;
-const uint8_t LCDC_WINDOW_TILEMAP =		0b01000000;
-const uint8_t LCDC_WINDOW_ENABLE =		0b00100000;
-const uint8_t LCDC_TILEDATA = 			0b00010000;
-const uint8_t LCDC_BG_TILEMAP = 		0b00001000;
-const uint8_t LCDC_SPRITE_SIZE = 		0b00000100;
-const uint8_t LCDC_SPRITE_ENABLE =		0b00000010;
-const uint8_t LCDC_DISPLAY_ENABLE = 	0b00000001;
+const uint8_t LCDC_ENABLE_LCD = 		0b10000000;
+const uint8_t LCDC_TILEMAP_WINDOW =		0b01000000;
+const uint8_t LCDC_ENABLE_WINDOW =		0b00100000;
+const uint8_t LCDC_TILEDATA_BG_WINDOW = 0b00010000;
+const uint8_t LCDC_TILEMAP_BG = 		0b00001000;
+const uint8_t LCDC_SIZE_SPRITE = 		0b00000100;
+const uint8_t LCDC_ENABLE_SPRITE= 		0b00000010;
+const uint8_t LCDC_ENABLE_BG_WINDOW = 	0b00000001;
 
 const uint8_t GPUMODE_HBLANK = 		0b00;
 const uint8_t GPUMODE_VBLANK = 		0b01;
-const uint8_t GPUMODE_OAM =			0b10;
+const uint8_t GPUMODE_OAM = 		0b10;
 const uint8_t GPUMODE_VRAM = 		0b11;
+
+const uint8_t COLOR_WHITE = 		0b00;
+const uint8_t COLOR_LIGHT_GRAY = 	0b01;
+const uint8_t COLOR_DARK_GRAY = 	0b10;
+const uint8_t COLOR_BLACK = 		0b11;
 
 class GPU : public Memory{
 public:
@@ -39,6 +44,15 @@ private:
 	Screen *m_screen;
 
 	void set_gpumode(uint8_t mode);
+	
+	void render_scanline();
+	
+	void render_scanline_tiles();
+	void render_scanline_sprites();
+
+	static uint16_t get_addr(uint16_t addr, uint8_t id, uint8_t size);
+	
+	uint8_t framebuffer[160][144];
 
 	uint8_t ram_video[0x2000];
 	uint8_t oam[0xA0];

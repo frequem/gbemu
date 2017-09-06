@@ -246,8 +246,6 @@ void CPU::handle_opcode(uint8_t opcode){
 		case 0xFB: op_ei(); break;
 		case 0xFE: op_cp(AF.high, get_byte()); break;
 		case 0xFF: op_rst(0x38); break;
-		default:
-			std::cout << "unknown opcode: " << std::hex << (int)opcode << std::endl;
 	}
 }
 
@@ -509,7 +507,5 @@ void CPU::handle_opcode_cb(uint8_t opcode){
 		case 0xFD: op_set(HL.low, 	1 << 7); break;
 		case 0xFE: op_set(HL.val, 	1 << 7); break;
 		case 0xFF: op_set(AF.high, 	1 << 7); break;
-		default:
-			std::cout << "unknown CB opcode: " << std::hex << (int)opcode << std::endl;
 	}
 }

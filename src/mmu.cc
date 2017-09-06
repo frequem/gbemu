@@ -66,6 +66,7 @@ uint8_t MMU::read_io_register(uint16_t addr){
 			return m_joypad->read_byte(addr);
 		case 0xFF0F:
 			return interrupt_flag;
+		case 0xFF40:
 		case 0xFF42:
 		case 0xFF43:
 		case 0xFF44:
@@ -112,6 +113,7 @@ void MMU::write_byte(uint16_t addr, uint8_t val){
 
 void MMU::write_io_register(uint16_t addr, uint8_t val){
 	switch(addr){
+		case 0xFF7F: break; // there seems to be a bug in tetris world, where this io is written to, even though it has no use
 		case 0xFF00:
 			m_joypad->write_byte(addr, val); break;
 		case 0xFF0F:
@@ -128,13 +130,14 @@ void MMU::write_io_register(uint16_t addr, uint8_t val){
 			m_gpu->write_byte(addr, val); break;
 		case 0xFF46: //transfer dma to oam
 			copy(((uint16_t)val) << 8, 0xFE00, 140); break; //OAM is 160 bytes long but ff46 only transfers 140 for some reason
-		case 0xFF7F: break; // there seems to be a bug in tetris world, where this io is written to, even though it has no use
 		case 0xFF01: break; //TODO: implement serial transfer data
 		case 0xFF02: break; //TODO: implement serial IO control
 		case 0xFF06: break; //TODO: implement timer modulo
 		//TODO: implement audio
 		case 0xFF10: break;
+		case 0xFF11: break;
 		case 0xFF12: break;
+		case 0xFF13: break;
 		case 0xFF14: break;
 		case 0xFF17: break;
 		case 0xFF19: break;

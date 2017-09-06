@@ -1,11 +1,11 @@
 #include "gameboy.hh"
 #include "cartridge.hh"
-#include "screen.hh"
+#include "screen_none.hh"
 #include "joypad.hh"
 
 int main(){
 	Cartridge cart("tetris.gb");
-	Screen screen;
+	NoneScreen screen;
 	Joypad joypad;
 	Gameboy gb(&cart, &screen, &joypad);
 

@@ -11,6 +11,7 @@ GPU *gpu;
 CPU *cpu;
 
 #include "test_cpu_ops.hh"
+#include "test_gpu.hh"
 
 int main(int argc, char **argv){
 	mmu = new MMU();
