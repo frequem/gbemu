@@ -43,7 +43,7 @@ void SDL2Screen::draw(uint8_t framebuffer[160][144]){
 }
 
 bool SDL2Screen::enabled(){
-	usleep(100); //awful hack until timing is implemented
+	usleep(10); //awful hack until timing is implemented
 	while(SDL_PollEvent(event)){
 		if (event->type == SDL_QUIT) {
 			running = false;

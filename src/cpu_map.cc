@@ -1,6 +1,29 @@
 #include "cpu.hh"
 #include <iostream>
 
+const int cycles[0x100] = {
+	4,  12, 8,  8,  4,  4,  8,  4,  20, 8,  8,  8, 4,  4,  8, 4,
+	4,  12, 8,  8,  4,  4,  8,  4,  12, 8,  8,  8, 4,  4,  8, 4,
+	8,  12, 8,  8,  4,  4,  8,  4,  8,  8,  8,  8, 4,  4,  8, 4,
+	8,  12, 8,  8,  12, 12, 12, 4,  8,  8,  8,  8, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
+	8,  12, 12, 16, 12, 16, 8,  16, 8,  16, 12, 4, 12, 24, 8, 16,
+	8,  12, 12, 0,  12, 16, 8,  16, 8,  16, 12, 0, 12, 0,  8, 16,
+	12, 12, 8,  0,  0,  16, 8,  16, 16, 4,  16, 0, 0,  0,  8, 16,
+	12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4, 0,  0,  8, 16,
+};
+
+const int cycles_cb[0x10] = {
+	8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8
+};
+
 void CPU::handle_opcode(uint8_t opcode){
 	switch(opcode){
 		case 0x00: op_nop(); break;
@@ -247,6 +270,7 @@ void CPU::handle_opcode(uint8_t opcode){
 		case 0xFE: op_cp(AF.high, get_byte()); break;
 		case 0xFF: op_rst(0x38); break;
 	}
+	m_timer->add_cycles(cycles[opcode]);
 }
 
 void CPU::handle_opcode_cb(uint8_t opcode){
@@ -508,4 +532,5 @@ void CPU::handle_opcode_cb(uint8_t opcode){
 		case 0xFE: op_set(HL.val, 	1 << 7); break;
 		case 0xFF: op_set(AF.high, 	1 << 7); break;
 	}
+	m_timer->add_cycles(cycles_cb[opcode & 0x0F]); //all cycles are equal
 }

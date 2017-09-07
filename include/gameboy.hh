@@ -16,9 +16,9 @@ public:
 
 	void run();
 private:
-	void tick();
 	
 	Screen *m_screen;
+	Timer *m_timer;
 	MMU *m_mmu;
 	GPU *m_gpu;
 	CPU *m_cpu;

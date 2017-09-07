@@ -3,19 +3,20 @@
 CPU::CPU(){
 }
 
-CPU::CPU(MMU *mmu){
-	Init(mmu);
+CPU::CPU(MMU *mmu, Timer *timer){
+	Init(mmu, timer);
 }
 
-void CPU::Init(MMU *mmu){
+void CPU::Init(MMU *mmu, Timer* timer){
 	m_mmu = mmu;
+	m_timer = timer;
 	reset();
 }
 
 void CPU::reset(){
 	PC = 0x0100;
 
-	AF = 0x01B0;//GB
+	AF = 0x01B0;//DMG
 	BC = 0x0013;
 	DE = 0x00D8;
 	HL = 0x014D;
@@ -25,7 +26,7 @@ void CPU::reset(){
 	halted = false;
 }
 
-void CPU::tick(){
+void CPU::cycle(){
 	if(!halted) handle_opcode(get_byte());
 	handle_interrupts();
 }
@@ -71,6 +72,7 @@ void CPU::handle_interrupts(){
 			halted = false;
 			interrupt_master_enable = false;
 			stack_push(PC.val);
+			m_timer->add_cycles(12);
 		}
 		
 		if(i & INTR_VBLANK){

@@ -4,6 +4,7 @@
 class CPU;
 
 #include "mmu.hh"
+#include "timer.hh"
 #include <cstdint>
 
 const uint8_t FLAG_ZERO =		0b10000000;
@@ -27,14 +28,15 @@ union RegPair{
 class CPU{
 public:
 	CPU();
-	CPU(MMU *mmu);
-	void Init(MMU *mmu);
+	CPU(MMU *mmu, Timer *timer);
+	void Init(MMU *mmu, Timer *timer);
 	~CPU();
 
 	void reset();
-	void tick();
+	void cycle();
 private:
 	MMU *m_mmu;
+	Timer *m_timer;
 	
 	RegPair AF, BC, DE, HL, SP, PC;
 	

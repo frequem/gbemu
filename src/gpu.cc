@@ -3,13 +3,14 @@
 
 GPU::GPU(){}
 
-GPU::GPU(MMU *mmu, Screen *screen){
-	Init(mmu, screen);
+GPU::GPU(MMU *mmu, Screen *screen, Timer *timer){
+	Init(mmu, screen, timer);
 }
 
-void GPU::Init(MMU *mmu, Screen *screen){
+void GPU::Init(MMU *mmu, Screen *screen, Timer *timer){
 	m_mmu = mmu;
 	m_screen = screen;
+	m_timer = timer;
 	reset();
 }
 
@@ -93,35 +94,42 @@ void GPU::write_byte(uint16_t addr, uint8_t val){
 	}
 }
 
-void GPU::tick(){
+void GPU::cycle(){
 	switch(lcdc_status & 0b11){
 		case GPUMODE_HBLANK:
-			line_y++;
-			if(line_y == 144){
-				set_gpumode(GPUMODE_VBLANK);
-				m_mmu->set_interrupt_flag(INTR_VBLANK, 1);
-				m_screen->draw(framebuffer);
-			}else{
-				set_gpumode(GPUMODE_OAM);
+			if(m_timer->try_elapse_cycles(204)){
+				line_y++;
+				if(line_y == 144){
+					set_gpumode(GPUMODE_VBLANK);
+					m_mmu->set_interrupt_flag(INTR_VBLANK, 1);
+					m_screen->draw(framebuffer);
+				}else{
+					set_gpumode(GPUMODE_OAM);
+				}
 			}
 			break;
 		case GPUMODE_VBLANK:
-			line_y++;
-			if(line_y == 154){
-				line_y = 0;
-				set_gpumode(GPUMODE_OAM);
+			if(m_timer->try_elapse_cycles(456)){
+				line_y++;
+				if(line_y == 154){
+					line_y = 0;
+					set_gpumode(GPUMODE_OAM);
+				}
 			}
 			break;
 		case GPUMODE_OAM:
-			set_gpumode(GPUMODE_VRAM);
+			if(m_timer->try_elapse_cycles(80)){
+				set_gpumode(GPUMODE_VRAM);
+			}
 			break;
 		case GPUMODE_VRAM:
-			set_gpumode(GPUMODE_HBLANK);
+			if(m_timer->try_elapse_cycles(172)){
+				set_gpumode(GPUMODE_HBLANK);
 
-			if((lcd_control & LCDC_ENABLE_LCD) != 0){
-				render_scanline();
+				if((lcd_control & LCDC_ENABLE_LCD) != 0){
+					render_scanline();
+				}
 			}
-			
 			break;
 	}
 }

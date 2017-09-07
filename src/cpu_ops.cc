@@ -1,6 +1,7 @@
 #include "cpu.hh"
 
-void CPU::op_nop(){}
+void CPU::op_nop(){
+}
 
 void CPU::op_ld(uint16_t& reg, uint16_t val){
 	reg = val;

@@ -6,6 +6,7 @@ class GPU;
 #include "memory.hh"
 #include "mmu.hh"
 #include "screen.hh"
+#include "timer.hh"
 
 const uint8_t LCDC_ENABLE_LCD = 		0b10000000;
 const uint8_t LCDC_TILEMAP_WINDOW =		0b01000000;
@@ -29,8 +30,8 @@ const uint8_t COLOR_BLACK = 		0b11;
 class GPU : public Memory{
 public:
 	GPU();
-	GPU(MMU *mmu, Screen *screen);
-	void Init(MMU *mmu, Screen *screen);
+	GPU(MMU *mmu, Screen *screen, Timer *timer);
+	void Init(MMU *mmu, Screen *screen, Timer *timer);
 	~GPU();
 
 	void reset();
@@ -38,10 +39,11 @@ public:
 	uint8_t read_byte(uint16_t addr);
 	void write_byte(uint16_t addr, uint8_t val);
 
-	void tick();
+	void cycle();
 private:
 	MMU *m_mmu;
 	Screen *m_screen;
+	Timer *m_timer;
 
 	void set_gpumode(uint8_t mode);
 	
