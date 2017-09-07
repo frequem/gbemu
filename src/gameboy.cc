@@ -7,10 +7,17 @@ Gameboy::Gameboy(Cartridge *cartridge, Screen *screen, Joypad *joypad){
 }
 
 void Gameboy::Init(Cartridge *cartridge, Screen *screen, Joypad *joypad){
+	m_screen = screen;
 	m_mmu = new MMU();
 	m_gpu = new GPU(m_mmu, screen);
 	m_cpu = new CPU(m_mmu);
 	m_mmu->Init(cartridge, m_gpu, joypad);
+}
+
+void Gameboy::run(){
+	while(m_screen->enabled()){
+		this->tick();
+	}
 }
 
 void Gameboy::tick(){

@@ -6,6 +6,7 @@
 class Screen{
 public:
 	virtual void draw(uint8_t framebuffer[160][144]) = 0;
+	virtual bool enabled() = 0;
 	virtual ~Screen(){}
 };
 

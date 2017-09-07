@@ -14,8 +14,11 @@ public:
 	void Init(Cartridge *cartridge, Screen *screen, Joypad *joypad);
 	~Gameboy();
 
-	void tick();
+	void run();
 private:
+	void tick();
+	
+	Screen *m_screen;
 	MMU *m_mmu;
 	GPU *m_gpu;
 	CPU *m_cpu;

@@ -10,3 +10,7 @@ void NoneScreen::draw(uint8_t framebuffer[160][144]){
 		}
 	}
 }
+
+bool NoneScreen::enabled(){
+	return true;
+}
