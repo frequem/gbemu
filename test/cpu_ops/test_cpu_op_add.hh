@@ -16,6 +16,16 @@ TEST(CPU_Test, op_add_8_8){
 	ASSERT_EQ(cpu->get_flag(FLAG_CARRY), 0);
 }
 
+TEST(CPU_Test, op_add_8_8_zero){
+	cpu->set_flag(FLAG_ZERO, 0);
+	uint8_t test = 0xFF;
+	
+	cpu->op_add(test, (uint8_t)1);
+	
+	ASSERT_EQ(test, 0);
+	ASSERT_EQ(cpu->get_flag(FLAG_ZERO), 1);
+}
+
 TEST(CPU_Test, op_add_8_8_half_carry){
 	cpu->set_flag(FLAG_HALF_CARRY, 0);
 	cpu->set_flag(FLAG_CARRY, 1);

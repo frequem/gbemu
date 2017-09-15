@@ -5,7 +5,9 @@
 
 class NoneScreen : public Screen{
 public:
-	void draw(uint8_t framebuffer[160][144]);
+	NoneScreen();
+	void render(uint8_t screenbuffer[160][144][3]);
+	void draw();
 	bool enabled();
 };
 

@@ -8,7 +8,7 @@ INSTALLDIR=/usr/local/bin
 CXX=g++
 
 CXXFLAGS=-Wall -O3
-LIBS= -lSDL2
+LIBS= -lSDL2 -lGL -lGLEW
 
 TEST_CXXFLAGS=$(CXXFLAGS)
 TEST_LIBS=$(LIBS) -lgtest -lgtest_main -lpthread 

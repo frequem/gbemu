@@ -1,6 +1,9 @@
 #include "gpu.hh"
 #include <iostream>
 
+#define READ(addr) m_mmu->read_byte(addr)
+#define WRITE(addr, val) m_mmu->write_byte(addr, val)
+
 GPU::GPU(){}
 
 GPU::GPU(MMU *mmu, Screen *screen, Timer *timer){
@@ -15,228 +18,207 @@ void GPU::Init(MMU *mmu, Screen *screen, Timer *timer){
 }
 
 void GPU::reset(){
-	lcd_control = 0x91;
-	scroll_y = 0;
-	scroll_x = 0;
-	line_y = 0;
-	palette_bg_window = 0xFC;
-	palette_obj_0 = 0xFF;
-	palette_obj_1 = 0xFF;
-	window_y = 0;
-	window_x = 0;
-
-	lcdc_status = GPUMODE_HBLANK;//not in doc
+	m_gpu_cycles = m_timer->get();
+	set_gpumode(GPUMODE_HBLANK, false);
 }
 
-void GPU::set_gpumode(uint8_t mode){
-	lcdc_status = (lcdc_status & 0b11111100) | mode;
-}
+void GPU::set_gpumode(uint8_t mode, bool set_interrupt){
+	uint8_t lcdc_status = (READ(ADDR_LCDC_STATUS) & 0b11111100) | mode;
 
-uint8_t GPU::read_byte(uint16_t addr){
-	if(addr < 0xA000){
-		return ram_video[addr & 0x1FFF];
-	}else if(addr < 0xFEA0){
-		return oam[addr & 0xFF];
-	}
+	if(set_interrupt){
+		uint8_t intr = 0;
+		switch(mode){
+			case GPUMODE_HBLANK:
+				intr = STAT_INTR_HBLANK; break;
+			case GPUMODE_VBLANK:
+				intr = STAT_INTR_VBLANK; break;
+			case GPUMODE_OAM:
+				intr = STAT_INTR_OAM; break;
+		}
 
-	switch(addr){
-		case 0xFF40:
-			return lcd_control;
-		case 0xFF42:
-			return scroll_y;
-		case 0xFF43:
-			return scroll_x;
-		case 0xFF44:
-			return line_y;
-		case 0xFF41:
-			return lcdc_status;
-		case 0xFF47:
-			return palette_bg_window;
-		case 0xFF48:
-			return palette_obj_0;
-		case 0xFF49:
-			return palette_obj_1;
-		case 0xFF4A:
-			return window_y;
-		case 0xFF4B:
-			return window_x;
+		if((lcdc_status & intr) == intr){
+			m_mmu->write_bit(ADDR_INTERRUPT_FLAG, INTR_LCDC, 1);
+		}
 	}
 	
-	return 0;
-}
-
-void GPU::write_byte(uint16_t addr, uint8_t val){
-	if(addr < 0xA000){
-		ram_video[addr & 0x1FFF] = val;
-	}else if(addr < 0xFEA0){
-		oam[addr & 0xFF] = val;
-	}
-
-	switch(addr){
-		case 0xFF40:
-			lcd_control = val; break;
-		case 0xFF42:
-			scroll_y = val; break;
-		case 0xFF43:
-			scroll_x = val; break;
-		case 0xFF41:
-			lcdc_status = val; break;
-		case 0xFF47:
-			palette_bg_window = val; break;
-		case 0xFF48:
-			palette_obj_0 = val; break;
-		case 0xFF49:
-			palette_obj_1 = val; break;
-		case 0xFF4A:
-			window_y = val; break;
-		case 0xFF4B:
-			window_x = val; break;
-	}
+	WRITE(ADDR_LCDC_STATUS, lcdc_status);
 }
 
 void GPU::cycle(){
-	switch(lcdc_status & 0b11){
+	if(!m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_ENABLE_LCD)){
+		m_gpu_cycles = m_timer->get();
+		WRITE(ADDR_LCDC_Y_COORD, 0);
+		set_gpumode(GPUMODE_VBLANK, false);
+		return;
+	}
+
+	switch(READ(ADDR_LCDC_STATUS) & 0b11){
 		case GPUMODE_HBLANK:
-			if(m_timer->try_elapse_cycles(204)){
-				line_y++;
-				if(line_y == 144){
-					set_gpumode(GPUMODE_VBLANK);
-					m_mmu->set_interrupt_flag(INTR_VBLANK, 1);
-					m_screen->draw(framebuffer);
+			if(m_timer->elapse(m_gpu_cycles, CYCLES_HBLANK)){
+				m_mmu->increment(ADDR_LCDC_Y_COORD);
+				if(READ(ADDR_LCDC_Y_COORD) == 144){
+					m_screen->render(screenbuffer);
+					set_gpumode(GPUMODE_VBLANK, true);
+					m_mmu->write_bit(ADDR_INTERRUPT_FLAG, INTR_VBLANK, 1);
 				}else{
-					set_gpumode(GPUMODE_OAM);
+					set_gpumode(GPUMODE_OAM, false);
 				}
 			}
 			break;
 		case GPUMODE_VBLANK:
-			if(m_timer->try_elapse_cycles(456)){
-				line_y++;
-				if(line_y == 154){
-					line_y = 0;
-					set_gpumode(GPUMODE_OAM);
+			if(m_timer->elapse(m_gpu_cycles, CYCLES_VBLANK)){
+				m_mmu->increment(ADDR_LCDC_Y_COORD);
+				if(READ(ADDR_LCDC_Y_COORD) >= 154){
+					WRITE(ADDR_LCDC_Y_COORD, 0);
+					set_gpumode(GPUMODE_OAM, true);
 				}
 			}
 			break;
 		case GPUMODE_OAM:
-			if(m_timer->try_elapse_cycles(80)){
-				set_gpumode(GPUMODE_VRAM);
+			if(m_timer->elapse(m_gpu_cycles, CYCLES_OAM)){
+				set_gpumode(GPUMODE_VRAM, false);
 			}
 			break;
 		case GPUMODE_VRAM:
-			if(m_timer->try_elapse_cycles(172)){
-				set_gpumode(GPUMODE_HBLANK);
-
-				if((lcd_control & LCDC_ENABLE_LCD) != 0){
-					render_scanline();
-				}
+			if(m_timer->elapse(m_gpu_cycles, CYCLES_VRAM)){
+				render_scanline();
+				set_gpumode(GPUMODE_HBLANK, true);
 			}
 			break;
+	}
+
+	if(READ(ADDR_LCDC_Y_COORD) == READ(ADDR_LY_COMPARE)){
+		m_mmu->write_bit(ADDR_LCDC_STATUS, STAT_LY_COINCIDENCE, 1);
+		if(READ(ADDR_LCDC_STATUS) & STAT_INTR_LY_COINCIDENCE){
+			m_mmu->write_bit(ADDR_INTERRUPT_FLAG, INTR_LCDC, 1);
+		}
+	}else{
+		m_mmu->write_bit(ADDR_LCDC_STATUS, STAT_LY_COINCIDENCE, 0);
 	}
 }
 
 void GPU::render_scanline(){
-	if((lcd_control & LCDC_ENABLE_BG_WINDOW) != 0)
+	if(m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_ENABLE_BG_WINDOW))
 		render_scanline_tiles();
-	if((lcd_control & LCDC_ENABLE_SPRITE) != 0)
+	if(m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_ENABLE_SPRITE))
 		render_scanline_sprites();
 }
 
 void GPU::render_scanline_tiles(){
-	bool render_window = ((lcd_control & LCDC_ENABLE_WINDOW) != 0) && (window_y <= line_y);
+	uint8_t line_y = m_mmu->read_byte(ADDR_LCDC_Y_COORD);
+	uint8_t scroll_y = m_mmu->read_byte(ADDR_SCROLL_Y);
+	uint8_t scroll_x = m_mmu->read_byte(ADDR_SCROLL_X);
+	uint8_t window_y = m_mmu->read_byte(ADDR_WINDOW_Y_POS);
+	uint8_t window_x = m_mmu->read_byte(ADDR_WINDOW_X_POS);
+	
+	bool render_window = m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_ENABLE_WINDOW) && (window_y <= line_y);
+	
+	uint16_t addr_tiledata_region = m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_TILEDATA_BG_WINDOW)?0x8000:0x8800;
 
-	uint16_t addr_tiledata = ((lcd_control & LCDC_TILEDATA_BG_WINDOW) == 0)?0x8800:0x8000;
-	uint16_t addr_tilemap;
+	uint16_t addr_tilemap_region;
 	if(render_window)
-		addr_tilemap = ((lcd_control & LCDC_TILEMAP_WINDOW) == 0)?0x9800:0x9C00;
+		addr_tilemap_region = m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_TILEMAP_WINDOW)?0x9C00:0x9800;
 	else
-		addr_tilemap = ((lcd_control & LCDC_TILEMAP_BG) == 0)?0x9800:0x9C00;
-
-	//vertical tile
-	uint8_t tile_y = render_window?(line_y - window_y):(line_y + scroll_y);
-
-	//vertical pixel of tile
-	uint16_t tile_row = (tile_y >> 3) << 5;
+		addr_tilemap_region = m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_TILEMAP_BG)?0x9C00:0x9800;
+	
+	uint8_t tile_y = render_window?(line_y - window_y):(scroll_y + line_y);
+	uint16_t tile_row = tile_y >> 3;
 
 	for(uint8_t p = 0; p < 160; p++){
-		uint8_t tile_x = (render_window && p >= window_x)?(p - window_x):(p + scroll_x);
-
+		uint8_t tile_x = (render_window && (p >= window_x))?(p - window_x):(p + scroll_x);
 		uint16_t tile_col = tile_x >> 3;
 
-		uint16_t addr_tile = addr_tilemap + tile_row + tile_col;
+		uint8_t tile_id = m_mmu->read_byte(addr_tilemap_region + (tile_row << 5) + tile_col);
+		
+		uint16_t addr_tiledata = get_addr_tiledata(addr_tiledata_region, tile_id, 16); //16 bytes per tile
 
-		//can be signed or unsigned
-		uint8_t tile_id = m_mmu->read_byte(addr_tile);
+		uint8_t line = (tile_y & 0b111) << 1;
 
-		addr_tile = get_addr(addr_tiledata, tile_id, 16);
+		uint8_t data0 = m_mmu->read_byte(addr_tiledata + line);
+		uint8_t data1 = m_mmu->read_byte(addr_tiledata + line + 1);
 
-		uint8_t line = (tile_y & 0b111) << 1; //multiply by 2 (two bytes per line)
+		int8_t colorBit = ((tile_x & 0b111) - 0b111) * -1;
+		uint8_t color_id = (((data1 >> colorBit) & 1) << 1) | ((data0 >> colorBit) & 1);
 
-		uint8_t byte0 = m_mmu->read_byte(addr_tile + line);
-		uint8_t byte1 = m_mmu->read_byte(addr_tile + line +1);
-
-		//get pixel color index
-		uint8_t bit_color = 0b111 - (tile_x & 0b111);
-		uint8_t id_color = ((byte0 >> bit_color) & 1) | ((byte1 >> bit_color) << 1);
-		uint8_t color = (palette_bg_window >> (id_color << 1)) & 3;
-
-		framebuffer[p][line_y] = color;
+		uint8_t *color = get_color(color_id, m_mmu->read_byte(ADDR_BG_WINDOW_PALETTE_DATA));
+		screenbuffer[line_y][p][0] = color[0];
+		screenbuffer[line_y][p][1] = color[1];
+		screenbuffer[line_y][p][2] = color[2];
 	}
 }
-
 void GPU::render_scanline_sprites(){
+	uint8_t sprite_height = m_mmu->read_bit(ADDR_LCD_CONTROL, LCDC_SIZE_SPRITE)?16:8;
+	uint8_t line_y = m_mmu->read_byte(ADDR_LCDC_Y_COORD);
+	
 	for(uint8_t s = 0; s < 40; s++){
-		uint8_t sprite_index = s * 4; // 4 bytes per sprite
+		uint8_t sprite_index = s << 2;
 		
 		uint8_t sprite_y = m_mmu->read_byte(0xFE00 + sprite_index) - 16;
 		uint8_t sprite_x = m_mmu->read_byte(0xFE00 + sprite_index + 1) - 8;
 		uint8_t tile_location = m_mmu->read_byte(0xFE00 + sprite_index + 2);
-		uint8_t attr = m_mmu->read_byte(0xFE00 + sprite_index + 3);
+		uint8_t attr =  m_mmu->read_byte(0xFE00 + sprite_index + 3);
 
-		bool flip_y = (attr & 0b01000000) != 0;
-		bool flip_x = (attr & 0b00100000) != 0;
+		bool flip_y = (attr >> 6) & 1;
+		bool flip_x = (attr >> 5) & 1;
 
-		uint8_t size_y = ((lcd_control & LCDC_SIZE_SPRITE) == 0)?8:16;
+		if((line_y >= sprite_y) && (line_y < (sprite_y + sprite_height))){
+			int16_t line = flip_y?((sprite_height - 1) - (line_y - sprite_y)):(line_y - sprite_y);
 
-		if((line_y >= sprite_y) && (line_y < (sprite_y + size_y))){
-			uint8_t line = line_y - sprite_y;
+			uint16_t addr_tiledata = (0x8000 + (tile_location * 16) + (line*2));
+			
+			uint8_t data0 = m_mmu->read_byte(addr_tiledata);
+			uint8_t data1 = m_mmu->read_byte(addr_tiledata + 1);
 
-			if(flip_y)
-				line = (size_y - 1) - line;
+			for(int8_t p = 7; p >= 0; p--){
+				int8_t colorBit = p;
+				if(flip_x){
+					colorBit -= 0b111;
+					colorBit *= -1;
+				}
+				uint8_t color_id = (((data1 >> colorBit) & 1) << 1) | ((data0 >> colorBit) & 1);
 
-			uint16_t addr_tile = (0x8000 + (tile_location << 4) + line);
+				uint8_t palette = READ(((attr >> 4) & 1)?ADDR_OBJECT_PALETTE_1_DATA:ADDR_OBJECT_PALETTE_0_DATA);
+				uint8_t *color = get_color(color_id, palette);
 
-			uint8_t byte0 = m_mmu->read_byte(addr_tile + line);
-			uint8_t byte1 = m_mmu->read_byte(addr_tile + line +1);
+				if(color[0] == 0xFF && color[1] == 0xFF && color[2] == 0xFF)
+					return;
 
-			for(uint8_t p = 7; p >= 0; p--){
-				uint8_t bit_color = p;
+				int8_t x = (-p) + 0b111;
+				uint8_t pixel = sprite_x + x;
 				
-				if(flip_x)
-					bit_color = 0b111 - (bit_color & 0b111);
-
-				uint8_t id_color = ((byte0 >> bit_color) & 1) | ((byte1 >> bit_color) << 1);
-
-				uint16_t addr_color = ((attr & 0b01000000) == 0)?0xFF48:0xFF49;
-				uint8_t palette = m_mmu->read_byte(addr_color);
-				
-				uint8_t color = (palette >> (id_color << 1)) & 3;
-
-				if(color == COLOR_WHITE) //transparent
-					continue;
-
-				uint8_t pixel = sprite_x + (0b111 - p);
-
-				framebuffer[pixel][line_y] = color;
+				screenbuffer[line_y][pixel][0] = color[0];
+				screenbuffer[line_y][pixel][1] = color[1];
+				screenbuffer[line_y][pixel][2] = color[2];
 			}
 		}
 	}
 }
 
-uint16_t GPU::get_addr(uint16_t addr, uint8_t id, uint8_t size){
-	//tile address
+uint16_t GPU::get_addr_tiledata(uint16_t addr, uint8_t id, uint8_t size){
 	if(addr == 0x8000)
 		return addr + (id * size);
 	return addr + ((((int8_t)id)+128) * size);
 }
 
+uint8_t* GPU::get_color(uint8_t id, uint8_t palette){
+	static uint8_t color[3];
+
+	uint8_t high = 0, low = 0;
+
+	switch(id){
+		case COLOR_WHITE: high = 1; low = 0; break;
+		case COLOR_LIGHT_GRAY: high = 3; low = 2; break;
+		case COLOR_DARK_GRAY: high = 5; low = 5; break;
+		case COLOR_BLACK: high = 7; low = 6; break;
+	}
+
+	uint8_t c = 0;
+
+	c = (((palette >> high) & 1) << 1) | ((palette >> low)& 1);
+
+	for(uint8_t i = 0; i < 3; i++)
+		color[i] = COLORS[c][i];
+	
+	return color;
+}
 GPU::~GPU(){}

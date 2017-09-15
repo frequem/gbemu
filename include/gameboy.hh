@@ -6,6 +6,13 @@ class Gameboy;
 #include "cartridge.hh"
 #include "mmu.hh"
 #include "cpu.hh"
+#include "gpu.hh"
+#include "timer.hh"
+#include "joypad.hh"
+#include "screen.hh"
+
+const uint8_t FPS = 60;
+const uint32_t FRAMECYCLES = CLOCK_SPEED / FPS;
 
 class Gameboy{
 public:
@@ -16,7 +23,6 @@ public:
 
 	void run();
 private:
-	
 	Screen *m_screen;
 	Timer *m_timer;
 	MMU *m_mmu;

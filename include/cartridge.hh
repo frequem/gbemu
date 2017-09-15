@@ -3,23 +3,22 @@
 
 class Cartridge;
 
-#include "memory.hh"
+#include "mmu.hh"
 #include <string>
+#include <cstdint>
 
-class Cartridge : public Memory{
+class Cartridge{
 public:
 	Cartridge();
 	Cartridge(const std::string& fname);
 	void Init(const std::string& fname);
+	void InitInternal(MMU *mmu);
 	~Cartridge();
 
 	void load(const std::string& fname);
-	uint8_t read_byte(uint16_t addr);
-	void write_byte(uint16_t addr, uint8_t val);
 private:
-	uint8_t rombank_0[0x4000];
-	uint8_t rombank_1[0x4000];
-	uint8_t ram_external[0x2000];
+	std::string m_fname;
+	MMU *m_mmu;
 };
 
 #endif

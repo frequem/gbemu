@@ -1,4 +1,5 @@
 #include "cpu.hh"
+#include <iostream>
 
 CPU::CPU(){
 }
@@ -27,8 +28,13 @@ void CPU::reset(){
 }
 
 void CPU::cycle(){
-	if(!halted) handle_opcode(get_byte());
 	handle_interrupts();
+	
+	if(halted)
+		m_timer->add(4);
+	else {
+		handle_opcode(get_byte());
+	}
 }
 
 uint8_t CPU::get_byte(){
@@ -47,44 +53,53 @@ void CPU::set_flag(uint8_t flag, bool val){
 }
 
 bool CPU::get_flag(uint8_t flag){
-	return (AF.low & flag) != 0;
+	return (AF.low & flag) == flag;
 }
 
 void CPU::stack_push(uint16_t val){
-	m_mmu->write_word(SP.val, val);
 	SP.val -= 2;
+	m_mmu->write_word(SP.val, val);
 }
 
 uint16_t CPU::stack_pop(){
-	SP.val += 2;
 	uint16_t res =  m_mmu->read_word(SP.val);
+	SP.val += 2;
 	return res;
 }
 
-void CPU::handle_interrupts(){
+void CPU::handle_interrupts(){	
 	if(interrupt_master_enable && interrupt_master_pending){
 		interrupt_master_pending = false;
 	}else if(interrupt_master_enable || interrupt_master_pending){
 		interrupt_master_pending = false;
+
+		uint8_t flags = m_mmu->read_byte(0xFF0F); // interrupt flags
+		uint8_t ena = m_mmu->read_byte(0xFFFF); // interrupt enable
+		uint8_t i = 1;
 		
-		uint8_t i = m_mmu->read_byte(0xFFFF) & m_mmu->read_byte(0xFF0F); //i_ena & i_flag
-		if(i & 0b00011111){
-			halted = false;
-			interrupt_master_enable = false;
-			stack_push(PC.val);
-			m_timer->add_cycles(12);
-		}
-		
-		if(i & INTR_VBLANK){
-			PC.val = 0x40;
-		}else if(i & INTR_LCDC){
-			PC.val = 0x48;
-		}else if(i & INTR_TIMER){
-			PC.val = 0x50;
-		}else if(i & INTR_SERIAL){
-			PC.val = 0x58;
-		}else if(i & INTR_JOYPAD){
-			PC.val = 0x60;
+		while(flags){
+			if(flags & ena & i){
+				interrupt_master_enable = false;
+				halted = false;
+
+				m_mmu->write_bit(ADDR_INTERRUPT_FLAG, i, 0);
+				stack_push(PC.val);
+				
+				switch(i){
+					case INTR_VBLANK:
+						PC.val = 0x40; break;
+					case INTR_LCDC:
+						PC.val = 0x48; break;
+					case INTR_TIMER:
+						PC.val = 0x50; break;
+					case INTR_SERIAL:
+						PC.val = 0x58; break;
+					case INTR_JOYPAD:
+						PC.val = 0x60; break;
+				}
+			}
+			flags >>= 1;
+			i <<= 1;
 		}
 	}
 }

@@ -79,6 +79,7 @@ void CPU::op_rlc(uint16_t addr){
 void CPU::op_add(uint8_t& reg, uint8_t val){
 	uint8_t res = reg + val;
 
+	set_flag(FLAG_ZERO, res == 0);
 	set_flag(FLAG_SUBTRACT, 0);
 	set_flag(FLAG_HALF_CARRY, (res & 0xF) < (reg & 0xF));
 	set_flag(FLAG_CARRY, (res < reg) || (res < val));

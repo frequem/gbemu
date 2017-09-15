@@ -4,19 +4,22 @@
 #include "mmu.hh"
 #include "gpu.hh"
 #include "cpu.hh"
+#include "timer.hh"
 #undef private
 
 MMU *mmu;
 GPU *gpu;
 CPU *cpu;
+Timer *timer;
 
 #include "test_cpu_ops.hh"
 #include "test_gpu.hh"
 
 int main(int argc, char **argv){
+	timer = new Timer();
 	mmu = new MMU();
-	gpu = new GPU(mmu, NULL);
-	cpu = new CPU(mmu);
+	gpu = new GPU(mmu, NULL, timer);
+	cpu = new CPU(mmu, timer);
 	mmu->Init(NULL, gpu, NULL);
 	
 	::testing::InitGoogleTest(&argc, argv);
@@ -26,6 +29,7 @@ int main(int argc, char **argv){
 	delete mmu;
 	delete gpu;
 	delete cpu;
+	delete timer;
 	
 	return res;
 }

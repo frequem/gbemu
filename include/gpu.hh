@@ -3,7 +3,6 @@
 
 class GPU;
 
-#include "memory.hh"
 #include "mmu.hh"
 #include "screen.hh"
 #include "timer.hh"
@@ -17,6 +16,13 @@ const uint8_t LCDC_SIZE_SPRITE = 		0b00000100;
 const uint8_t LCDC_ENABLE_SPRITE= 		0b00000010;
 const uint8_t LCDC_ENABLE_BG_WINDOW = 	0b00000001;
 
+const uint8_t STAT_INTR_LY_COINCIDENCE = 	0b01000000;
+const uint8_t STAT_INTR_OAM = 				0b00100000;
+const uint8_t STAT_INTR_VBLANK = 			0b00010000;
+const uint8_t STAT_INTR_HBLANK = 			0b00001000;
+
+const uint8_t STAT_LY_COINCIDENCE = 		0b00000100;
+
 const uint8_t GPUMODE_HBLANK = 		0b00;
 const uint8_t GPUMODE_VBLANK = 		0b01;
 const uint8_t GPUMODE_OAM = 		0b10;
@@ -27,7 +33,19 @@ const uint8_t COLOR_LIGHT_GRAY = 	0b01;
 const uint8_t COLOR_DARK_GRAY = 	0b10;
 const uint8_t COLOR_BLACK = 		0b11;
 
-class GPU : public Memory{
+const uint8_t COLORS[4][3] = {
+	{0xFF, 0xFF, 0xFF},
+	{0xCC, 0xCC, 0xCC},
+	{0x77, 0x77, 0x77},
+	{0x00, 0x00, 0x00}
+};
+
+const uint16_t CYCLES_OAM = 	80;
+const uint16_t CYCLES_VRAM = 	172;
+const uint16_t CYCLES_HBLANK = 	204;
+const uint16_t CYCLES_VBLANK =	CYCLES_OAM + CYCLES_VRAM + CYCLES_HBLANK;
+
+class GPU{
 public:
 	GPU();
 	GPU(MMU *mmu, Screen *screen, Timer *timer);
@@ -36,39 +54,24 @@ public:
 
 	void reset();
 
-	uint8_t read_byte(uint16_t addr);
-	void write_byte(uint16_t addr, uint8_t val);
-
 	void cycle();
 private:
 	MMU *m_mmu;
 	Screen *m_screen;
 	Timer *m_timer;
 
-	void set_gpumode(uint8_t mode);
+	uint64_t m_gpu_cycles;
+
+	void set_gpumode(uint8_t mode, bool set_interrupt);
 	
 	void render_scanline();
 	
 	void render_scanline_tiles();
 	void render_scanline_sprites();
 
-	static uint16_t get_addr(uint16_t addr, uint8_t id, uint8_t size);
-	
-	uint8_t framebuffer[160][144];
-
-	uint8_t ram_video[0x2000];
-	uint8_t oam[0xA0];
-
-	uint8_t scroll_y; //FF42
-	uint8_t scroll_x; //FF43
-	uint8_t lcd_control; //FF40
-	uint8_t line_y; //FF44
-	uint8_t lcdc_status; //FF41
-	uint8_t palette_bg_window; //FF47
-	uint8_t palette_obj_0; //FF48
-	uint8_t palette_obj_1; //FF49
-	uint8_t window_y; //FF4A
-	uint8_t window_x; //FF4B
+	static uint16_t get_addr_tiledata(uint16_t addr, uint8_t id, uint8_t size);
+	static uint8_t* get_color(uint8_t id, uint8_t palette);
+	uint8_t screenbuffer[144][160][3];
 };
 
 #endif

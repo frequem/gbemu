@@ -12,7 +12,7 @@ TEST(CPU_Test, op_ei){
 	ASSERT_EQ(cpu->interrupt_master_enable, true);
 	ASSERT_EQ(cpu->interrupt_master_pending, true);
 
-	cpu->tick();
+	cpu->cycle();
 	
 	ASSERT_EQ(cpu->interrupt_master_enable, true);
 	ASSERT_EQ(cpu->interrupt_master_pending, false);
