@@ -20,7 +20,6 @@ int main(int argc, char **argv){
 	mmu = new MMU();
 	gpu = new GPU(mmu, NULL, timer);
 	cpu = new CPU(mmu, timer);
-	mmu->Init(NULL, gpu, NULL);
 	
 	::testing::InitGoogleTest(&argc, argv);
 	
