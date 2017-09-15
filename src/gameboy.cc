@@ -1,5 +1,6 @@
 #include "gameboy.hh"
-#include <iostream>
+#include <chrono>
+#include <thread>
 
 Gameboy::Gameboy(){}
 
@@ -21,12 +22,21 @@ void Gameboy::Init(Cartridge *cartridge, Screen *screen, Joypad *joypad){
 void Gameboy::run(){
 	uint64_t prev_cycles = 0;
 	while(m_screen->enabled()){
-		m_screen->draw();
+		
+		auto start = std::chrono::high_resolution_clock::now();
+		auto end = start + std::chrono::microseconds(1000000 / FPS);
+		
 		while(m_screen->enabled() && ((m_timer->get() - prev_cycles) < FRAMECYCLES)){
 			m_cpu->cycle();
 			m_gpu->cycle();
 			m_timer->cycle();
 		}
+		m_screen->draw();
+		
+		do {
+			std::this_thread::yield();
+		} while (std::chrono::high_resolution_clock::now() < end);
+		
 		prev_cycles = m_timer->get();
 	}
 }

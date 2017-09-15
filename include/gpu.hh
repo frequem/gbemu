@@ -33,6 +33,9 @@ const uint8_t COLOR_LIGHT_GRAY = 	0b01;
 const uint8_t COLOR_DARK_GRAY = 	0b10;
 const uint8_t COLOR_BLACK = 		0b11;
 
+const uint8_t SPRITE_FLIP_Y = 0b01000000;
+const uint8_t SPRITE_FLIP_X = 0b00100000;
+
 const uint8_t COLORS[4][3] = {
 	{0xFF, 0xFF, 0xFF},
 	{0xCC, 0xCC, 0xCC},
