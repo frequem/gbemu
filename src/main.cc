@@ -2,7 +2,7 @@
 #include "cartridge.hh"
 #include "screen_none.hh"
 #include "screen_sdl2.hh"
-#include "joypad.hh"
+#include "joypad_sdl2.hh"
 #include <iostream>
 
 int main(int argc, char* argv[]){
@@ -12,7 +12,7 @@ int main(int argc, char* argv[]){
 	}
 	Cartridge cart(argv[1]);
 	SDL2Screen screen;
-	Joypad joypad;
+	SDL2Joypad joypad;
 	Gameboy gb(&cart, &screen, &joypad);
 
 	gb.run();

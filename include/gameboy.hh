@@ -24,6 +24,7 @@ public:
 	void run();
 private:
 	Screen *m_screen;
+	Joypad *m_joypad;
 	Timer *m_timer;
 	MMU *m_mmu;
 	GPU *m_gpu;

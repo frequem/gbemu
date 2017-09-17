@@ -10,13 +10,14 @@ Gameboy::Gameboy(Cartridge *cartridge, Screen *screen, Joypad *joypad){
 
 void Gameboy::Init(Cartridge *cartridge, Screen *screen, Joypad *joypad){
 	m_screen = screen;
+	m_joypad = joypad;
 	m_mmu = new MMU();
 	m_timer = new Timer(m_mmu);
 	m_gpu = new GPU(m_mmu, m_screen, m_timer);
 	m_cpu = new CPU(m_mmu, m_timer);
 	
 	cartridge->InitInternal(m_mmu);
-	joypad->InitInternal(m_mmu);
+	m_joypad->InitInternal(m_mmu);
 }
 
 void Gameboy::run(){
@@ -27,6 +28,7 @@ void Gameboy::run(){
 		auto end = start + std::chrono::microseconds(1000000 / FPS);
 		
 		while(m_screen->enabled() && ((m_timer->get() - prev_cycles) < FRAMECYCLES)){
+			m_joypad->cycle();
 			m_cpu->cycle();
 			m_gpu->cycle();
 			m_timer->cycle();

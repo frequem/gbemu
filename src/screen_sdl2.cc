@@ -10,7 +10,7 @@ SDL2Screen::SDL2Screen(uint16_t width, uint16_t height){
 	
 	std::memset(&framebuffer, 0xFF, 160 * 144 * 3 * sizeof(uint8_t));
 	
-	if(SDL_Init(SDL_INIT_EVERYTHING) != 0){
+	if(SDL_Init(SDL_INIT_VIDEO) != 0){
 		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
 		running = false;
 		return;

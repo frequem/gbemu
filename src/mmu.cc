@@ -58,9 +58,6 @@ void MMU::write_byte(uint16_t addr, uint8_t val){
 			val = 0; break;
 		case ADDR_DMA_TRANSFER_ADDR:
 			dma_transfer(((uint16_t)val) << 8); return;
-		case ADDR_JOYPAD_INFO:
-			m_memory[ADDR_JOYPAD_INFO] |= (val & 0b00110000);
-			return; // for now
 	}
 	
 	m_memory[addr] = val;
