@@ -12,7 +12,3 @@ To build, run:
 To build a test executable, run:
 
     make test
-    
-# License
-
-This is under the GPLv3 license.
