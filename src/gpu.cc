@@ -140,7 +140,7 @@ void GPU::render_scanline_tiles(){
 		uint8_t bit_color = 0b111 - (tile_x & 0b111);
 		uint8_t color_id = (((data2 >> bit_color) & 1) << 1) | ((data1 >> bit_color) & 1);
 
-		uint8_t *color = get_color(color_id, READ(ADDR_BG_WINDOW_PALETTE_DATA));
+		uint8_t *color = get_color_dmg(color_id, READ(ADDR_BG_WINDOW_PALETTE_DATA));
 		
 		screenbuffer[lcdc_y][p][0] = color[0];
 		screenbuffer[lcdc_y][p][1] = color[1];
@@ -171,7 +171,7 @@ void GPU::render_scanline_sprites(){
 				uint8_t color_id = (((data2 >> bit_color) & 1) << 1) | ((data1 >> bit_color) & 1);
 
 				uint8_t palette = READ(((sprite_flags >> 4) & 1)?ADDR_OBJECT_PALETTE_1_DATA:ADDR_OBJECT_PALETTE_0_DATA);
-				uint8_t *color = get_color(color_id, palette);
+				uint8_t *color = get_color_dmg(color_id, palette);
 
 				if(color[0] == 0xFF && color[1] == 0xFF && color[2] == 0xFF)
 					continue;
@@ -191,24 +191,14 @@ uint16_t GPU::get_addr_tiledata(uint16_t addr, uint8_t id, uint8_t size){
 	return addr + ((((int8_t)id)+128) * size);
 }
 
-uint8_t* GPU::get_color(uint8_t id, uint8_t palette){
+uint8_t* GPU::get_color_dmg(uint8_t id, uint8_t palette){
 	static uint8_t color[3];
-
-	uint8_t high = 0, low = 0;
-
-	switch(id){
-		case COLOR_WHITE: high = 1; low = 0; break;
-		case COLOR_LIGHT_GRAY: high = 3; low = 2; break;
-		case COLOR_DARK_GRAY: high = 5; low = 4; break;
-		case COLOR_BLACK: high = 7; low = 6; break;
-	}
-
-	uint8_t c = 0;
-
-	c = (((palette >> high) & 1) << 1) | ((palette >> low)& 1);
+	
+	//(id << 1) [+ 1] ... high [low] bits (mapping to dmg_white (0) to dmg_black(3))
+	uint8_t c = (((palette >> ((id << 1) + 1)) & 1) << 1) | ((palette >> (id << 1)) & 1);
 
 	for(uint8_t i = 0; i < 3; i++)
-		color[i] = COLORS[c][i];
+		color[i] = COLORS_DMG[c][i];
 	
 	return color;
 }

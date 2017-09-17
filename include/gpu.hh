@@ -28,15 +28,15 @@ const uint8_t GPUMODE_VBLANK = 		0b01;
 const uint8_t GPUMODE_OAM = 		0b10;
 const uint8_t GPUMODE_VRAM = 		0b11;
 
-const uint8_t COLOR_WHITE = 		0b00;
-const uint8_t COLOR_LIGHT_GRAY = 	0b01;
-const uint8_t COLOR_DARK_GRAY = 	0b10;
-const uint8_t COLOR_BLACK = 		0b11;
+const uint8_t COLOR_DMG_WHITE = 		0b00;
+const uint8_t COLOR_DMG_LIGHT_GRAY = 	0b01;
+const uint8_t COLOR_DMG_DARK_GRAY = 	0b10;
+const uint8_t COLOR_DMG_BLACK = 		0b11;
 
 const uint8_t SPRITE_FLIP_Y = 0b01000000;
 const uint8_t SPRITE_FLIP_X = 0b00100000;
 
-const uint8_t COLORS[4][3] = {
+const uint8_t COLORS_DMG[4][3] = {
 	{0xFF, 0xFF, 0xFF},
 	{0xCC, 0xCC, 0xCC},
 	{0x77, 0x77, 0x77},
@@ -73,7 +73,7 @@ private:
 	void render_scanline_sprites();
 
 	static uint16_t get_addr_tiledata(uint16_t addr, uint8_t id, uint8_t size);
-	static uint8_t* get_color(uint8_t id, uint8_t palette);
+	static uint8_t* get_color_dmg(uint8_t id, uint8_t palette);
 	uint8_t screenbuffer[144][160][3];
 };
 
