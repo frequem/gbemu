@@ -63,14 +63,7 @@ void SDL2Screen::draw(){
 }
 
 bool SDL2Screen::enabled(){
-	SDL_Event event;
-	while(SDL_PollEvent(&event)){
-		if (event.type == SDL_QUIT) {
-			running = false;
-			break;
-		}
-	}
-	return running;
+	return !SDL_QuitRequested();
 }
 
 

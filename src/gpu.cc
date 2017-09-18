@@ -167,7 +167,7 @@ void GPU::render_scanline_sprites(){
 			uint8_t data2 = m_mmu->read_byte(addr_tiledata + 1);
 
 			for(uint8_t b = 0; b < 8; b++){
-				uint8_t bit_color = (sprite_flags & SPRITE_FLIP_Y)?(0b111 - b):b;
+				uint8_t bit_color = (sprite_flags & SPRITE_FLIP_X)?(0b111 - b):b;
 				uint8_t color_id = (((data2 >> bit_color) & 1) << 1) | ((data1 >> bit_color) & 1);
 
 				uint8_t palette = READ(((sprite_flags >> 4) & 1)?ADDR_OBJECT_PALETTE_1_DATA:ADDR_OBJECT_PALETTE_0_DATA);

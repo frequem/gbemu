@@ -7,7 +7,7 @@ INSTALLDIR=/usr/local/bin
 
 CXX=g++
 
-CXXFLAGS=-Wall -O3
+CXXFLAGS=-Wall -Ofast -fomit-frame-pointer -std=c++11
 LIBS= -lSDL2 -lGL -lGLEW
 
 TEST_CXXFLAGS=$(CXXFLAGS)

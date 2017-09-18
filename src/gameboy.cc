@@ -1,4 +1,5 @@
 #include "gameboy.hh"
+#include <iostream>
 #include <chrono>
 #include <thread>
 
@@ -25,19 +26,22 @@ void Gameboy::run(){
 	while(m_screen->enabled()){
 		
 		auto start = std::chrono::high_resolution_clock::now();
-		auto end = start + std::chrono::microseconds(1000000 / FPS);
 		
-		while(m_screen->enabled() && ((m_timer->get() - prev_cycles) < FRAMECYCLES)){
+		while(((m_timer->get() - prev_cycles) < FRAMECYCLES)){
 			m_joypad->cycle();
 			m_cpu->cycle();
 			m_gpu->cycle();
 			m_timer->cycle();
+			
 		}
 		m_screen->draw();
+
+		auto runtime = std::chrono::high_resolution_clock::now() - start;
 		
-		do {
-			std::this_thread::yield();
-		} while (std::chrono::high_resolution_clock::now() < end);
+		auto sleep_duration = std::chrono::microseconds(1000000 / FPS) - runtime;
+
+		if(sleep_duration > std::chrono::seconds(0))
+			std::this_thread::sleep_for(sleep_duration);
 		
 		prev_cycles = m_timer->get();
 	}
