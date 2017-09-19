@@ -10,7 +10,7 @@ SDL2Joypad::SDL2Joypad(){
 }
 
 void SDL2Joypad::cycle(){
-	SDL_PumpEvents(); //doesn't interfere with sdl-screen since event queue is only updated
+	//SDL_PumpEvents(); also work without for some reason and uses way less cpu 
 	uint8_t buttons = 0;
 	
 	if(keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])

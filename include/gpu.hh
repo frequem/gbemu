@@ -74,6 +74,7 @@ private:
 
 	static uint16_t get_addr_tiledata(uint16_t addr, uint8_t id, uint8_t size);
 	static uint8_t* get_color_dmg(uint8_t id, uint8_t palette);
+	
 	uint8_t screenbuffer[144][160][3];
 };
 
