@@ -31,8 +31,6 @@ private:
 	
 	void render_scanline_tiles();
 	void render_scanline_sprites();
-
-	uint8_t* get_color_cgb(uint8_t id, uint8_t palette_id, uint16_t addr_source);
 	
 	static uint16_t get_addr_tiledata(uint16_t addr, uint8_t id, uint8_t size);
 	static uint8_t* get_color_dmg(uint8_t id, uint8_t palette);

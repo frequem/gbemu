@@ -204,16 +204,4 @@ uint8_t* GPU::get_color_dmg(uint8_t id, uint8_t palette){
 	return color;
 }
 
-uint8_t* GPU::get_color_cgb(uint8_t id, uint8_t palette_id, uint16_t addr_source){
-	static uint8_t color[3];
-
-	//uint16_t rawcolor = m_mmu->read_color_raw(addr_source, (palette_id << 3) + (id << 1));
-	/*
-	color[0] = (rawcolor & SPRITE_COLOR_RED) << 3;
-	color[1] = (rawcolor & SPRITE_COLOR_GREEN) >> 2;
-	color[2] = (rawcolor & SPRITE_COLOR_BLUE) >> 7;*/
-	
-	return color;
-}
-
 GPU::~GPU(){}
