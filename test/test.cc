@@ -16,10 +16,10 @@ Timer *timer;
 #include "test_gpu.hh"
 
 int main(int argc, char **argv){
-	timer = new Timer();
-	mmu = new MMU();
-	gpu = new GPU(mmu, NULL, timer);
-	cpu = new CPU(mmu, timer);
+	mmu = new MMU(0);
+	timer = new Timer(mmu, 0);
+	gpu = new GPU(mmu, NULL, timer, 0);
+	cpu = new CPU(mmu, timer, 0);
 	
 	::testing::InitGoogleTest(&argc, argv);
 	
