@@ -1,28 +1,14 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-class Timer;
-
+#include "def.hh"
 #include "mmu.hh"
-
-const uint32_t CLOCK_SPEED = 4194304;
-
-const uint8_t TAC_TIMER_ENABLE = 0b100;
-
-const uint32_t CLOCK_FREQUENCIES[4] = {
-	4096,
-	262144,
-	65536,
-	16382
-};
-
-const uint32_t CLOCK_FREQUENCY_DIV = 16382;
 
 class Timer{
 public:
 	Timer();
-	Timer(MMU *mmu);
-	void Init(MMU *mmu);
+	Timer(MMU *mmu, uint8_t mode);
+	void Init(MMU *mmu, uint8_t mode);
 	
 	void reset();
 
@@ -32,6 +18,8 @@ public:
 	uint64_t get();
 	
 private:
+	uint8_t m_mode;
+	
 	MMU *m_mmu;
 	uint64_t m_cycles;
 

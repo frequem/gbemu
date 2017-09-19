@@ -1,23 +1,23 @@
 #include "cpu.hh"
-#include <iostream>
 
 CPU::CPU(){
 }
 
-CPU::CPU(MMU *mmu, Timer *timer){
-	Init(mmu, timer);
+CPU::CPU(MMU *mmu, Timer *timer, uint8_t mode){
+	Init(mmu, timer, mode);
 }
 
-void CPU::Init(MMU *mmu, Timer* timer){
+void CPU::Init(MMU *mmu, Timer* timer, uint8_t mode){
 	m_mmu = mmu;
 	m_timer = timer;
+	m_mode = mode;
 	reset();
 }
 
 void CPU::reset(){
 	PC = 0x0100;
-
-	AF = 0x01B0;//DMG
+	
+	AF = 0x01B0;
 	BC = 0x0013;
 	DE = 0x00D8;
 	HL = 0x014D;

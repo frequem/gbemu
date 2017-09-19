@@ -1,38 +1,9 @@
 #ifndef CPU_H
 #define CPU_H
 
-class CPU;
-
+#include "def.hh"
 #include "mmu.hh"
 #include "timer.hh"
-
-const uint8_t FLAG_ZERO =		0b10000000;
-const uint8_t FLAG_SUBTRACT =	0b01000000;
-const uint8_t FLAG_HALF_CARRY =	0b00100000;
-const uint8_t FLAG_CARRY =		0b00010000;
-
-const int OP_CYCLES[0x100] = {
-	4,  12, 8,  8,  4,  4,  8,  4,  20, 8,  8,  8, 4,  4,  8, 4,
-	4,  12, 8,  8,  4,  4,  8,  4,  12, 8,  8,  8, 4,  4,  8, 4,
-	8,  12, 8,  8,  4,  4,  8,  4,  8,  8,  8,  8, 4,  4,  8, 4,
-	8,  12, 8,  8,  12, 12, 12, 4,  8,  8,  8,  8, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4, 4,  4,  8, 4,
-	8,  12, 12, 16, 12, 16, 8,  16, 8,  16, 12, 4, 12, 24, 8, 16,
-	8,  12, 12, 0,  12, 16, 8,  16, 8,  16, 12, 0, 12, 0,  8, 16,
-	12, 12, 8,  0,  0,  16, 8,  16, 16, 4,  16, 0, 0,  0,  8, 16,
-	12, 12, 8,  4,  0,  16, 8,  16, 12, 8,  16, 4, 0,  0,  8, 16,
-};
-
-const int OP_CYCLES_CB[0x10] = {
-	8, 8, 8, 8, 8, 8, 16, 8, 8, 8, 8, 8, 8, 8, 16, 8
-};
 
 union RegPair{
 	struct{
@@ -50,13 +21,15 @@ union RegPair{
 class CPU{
 public:
 	CPU();
-	CPU(MMU *mmu, Timer *timer);
-	void Init(MMU *mmu, Timer *timer);
+	CPU(MMU *mmu, Timer *timer, uint8_t mode);
+	void Init(MMU *mmu, Timer *timer, uint8_t mode);
 	~CPU();
 
 	void reset();
 	void cycle();
 private:
+	uint8_t m_mode;
+	
 	MMU *m_mmu;
 	Timer *m_timer;
 	

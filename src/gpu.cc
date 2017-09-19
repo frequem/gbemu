@@ -6,14 +6,15 @@
 
 GPU::GPU(){}
 
-GPU::GPU(MMU *mmu, Screen *screen, Timer *timer){
-	Init(mmu, screen, timer);
+GPU::GPU(MMU *mmu, Screen *screen, Timer *timer, uint8_t mode){
+	Init(mmu, screen, timer, mode);
 }
 
-void GPU::Init(MMU *mmu, Screen *screen, Timer *timer){
+void GPU::Init(MMU *mmu, Screen *screen, Timer *timer, uint8_t mode){
 	m_mmu = mmu;
 	m_screen = screen;
 	m_timer = timer;
+	m_mode = mode;
 	reset();
 }
 
@@ -160,17 +161,17 @@ void GPU::render_scanline_sprites(){
 		uint8_t sprite_flags =  m_mmu->read_byte(0xFE00 + sprite_index + 3);
 
 		if((lcdc_y >= sprite_y) && (lcdc_y < (sprite_y + sprite_height))){
-			uint8_t line = (sprite_flags & SPRITE_FLIP_Y)?((sprite_height - 1) - (lcdc_y - sprite_y)):(lcdc_y - sprite_y);
+			uint8_t line = (sprite_flags & SPRITE_FLAG_FLIP_Y)?((sprite_height - 1) - (lcdc_y - sprite_y)):(lcdc_y - sprite_y);
 			uint16_t addr_tiledata = (0x8000 + (sprite_tile << 4) + (line << 1));
 			
 			uint8_t data1 = m_mmu->read_byte(addr_tiledata);
 			uint8_t data2 = m_mmu->read_byte(addr_tiledata + 1);
 
 			for(uint8_t b = 0; b < 8; b++){
-				uint8_t bit_color = (sprite_flags & SPRITE_FLIP_X)?(0b111 - b):b;
+				uint8_t bit_color = (sprite_flags & SPRITE_FLAG_FLIP_X)?(0b111 - b):b;
 				uint8_t color_id = (((data2 >> bit_color) & 1) << 1) | ((data1 >> bit_color) & 1);
 
-				uint8_t palette = READ(((sprite_flags >> 4) & 1)?ADDR_OBJECT_PALETTE_1_DATA:ADDR_OBJECT_PALETTE_0_DATA);
+				uint8_t palette = READ((sprite_flags & SPRITE_FLAG_PALETTE_ID)?ADDR_OBJECT_PALETTE_1_DATA:ADDR_OBJECT_PALETTE_0_DATA);
 				uint8_t *color = get_color_dmg(color_id, palette);
 
 				if(color[0] == 0xFF && color[1] == 0xFF && color[2] == 0xFF)
@@ -202,4 +203,17 @@ uint8_t* GPU::get_color_dmg(uint8_t id, uint8_t palette){
 	
 	return color;
 }
+
+uint8_t* GPU::get_color_cgb(uint8_t id, uint8_t palette_id, uint16_t addr_source){
+	static uint8_t color[3];
+
+	//uint16_t rawcolor = m_mmu->read_color_raw(addr_source, (palette_id << 3) + (id << 1));
+	/*
+	color[0] = (rawcolor & SPRITE_COLOR_RED) << 3;
+	color[1] = (rawcolor & SPRITE_COLOR_GREEN) >> 2;
+	color[2] = (rawcolor & SPRITE_COLOR_BLUE) >> 7;*/
+	
+	return color;
+}
+
 GPU::~GPU(){}

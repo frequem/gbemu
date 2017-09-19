@@ -1,11 +1,10 @@
 #ifndef CARTRIDGE_H
 #define CARTRIDGE_H
 
-class Cartridge;
-
-#include "mmu.hh"
 #include <string>
-#include <cstdint>
+
+#include "def.hh"
+#include "mmu.hh"
 
 class Cartridge{
 public:

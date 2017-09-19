@@ -1,7 +1,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include <cstdint>
+#include "def.hh"
 
 class Screen{
 public:

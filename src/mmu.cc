@@ -1,7 +1,8 @@
 #include "mmu.hh"
 #include <iostream>
 
-MMU::MMU(){
+MMU::MMU(uint8_t mode){
+	m_mode = mode;
 	reset();
 }
 
@@ -50,12 +51,10 @@ void MMU::write_byte(uint16_t addr, uint8_t val){
 	if((addr >= 0xFEA0) && (addr < 0xFEFF)) // restricted
 		return;
 
-	
-
-	switch(addr){ //writing will reset
+	switch(addr){
 		case ADDR_LCDC_Y_COORD:
 		case ADDR_DIVIDER_REGISTER:
-			val = 0; break;
+			val = 0; break; //writing will reset
 		case ADDR_DMA_TRANSFER_ADDR:
 			dma_transfer(((uint16_t)val) << 8); return;
 	}
@@ -65,7 +64,7 @@ void MMU::write_byte(uint16_t addr, uint8_t val){
 
 void MMU::dma_transfer(uint16_t addr_source){
 	for(uint16_t i = 0; i < 160; i++){
-		write_byte(0xFE00 + i, read_byte(addr_source + i));
+		write_byte(ADDR_OAM_START + i, read_byte(addr_source + i));
 	}
 }
 

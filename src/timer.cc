@@ -6,12 +6,13 @@
 Timer::Timer(){
 }
 
-Timer::Timer(MMU *mmu){
-	Init(mmu);
+Timer::Timer(MMU *mmu, uint8_t mode){
+	Init(mmu, mode);
 }
 
-void Timer::Init(MMU *mmu){
+void Timer::Init(MMU *mmu, uint8_t mode){
 	m_mmu = mmu;
+	m_mode = mode;
 	reset();
 }
 
@@ -34,13 +35,13 @@ bool Timer::elapse(uint64_t& cycle_counter, uint64_t cycles){
 }
 
 void Timer::cycle(){
-	uint64_t cycles = CLOCK_SPEED / CLOCK_FREQUENCY_DIV;
+	uint64_t cycles = CLOCK_SPEED_DMG / CLOCK_FREQUENCY_DIV;
 	if(elapse(m_div_cycles, cycles)){
 		m_mmu->increment(ADDR_DIVIDER_REGISTER);
 	}
 	
 	if(m_mmu->read_bit(ADDR_TIMER_CONTROL, TAC_TIMER_ENABLE)){
-		cycles = CLOCK_SPEED / CLOCK_FREQUENCIES[READ(ADDR_TIMER_CONTROL) & 0b11];
+		cycles = CLOCK_SPEED_DMG / CLOCK_FREQUENCIES[READ(ADDR_TIMER_CONTROL) & TAC_CLOCK_SELECT];
 		if(elapse(m_tima_cycles, cycles)){
 			if(READ(ADDR_TIMER_COUNTER) == 0xFF){
 				WRITE(ADDR_TIMER_COUNTER, m_mmu->read_byte(ADDR_TIMER_MODULO));
