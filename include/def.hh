@@ -2,6 +2,7 @@
 #define DEF_H
 
 #include <cstdint>
+#include <map>
 
 const uint8_t MODE_DMG = 0;
 
@@ -16,6 +17,41 @@ const uint16_t CYCLES_HBLANK = 	204;
 const uint16_t CYCLES_VBLANK =	CYCLES_OAM + CYCLES_VRAM + CYCLES_HBLANK;
 
 const uint16_t ADDR_ROMBANK_0_START = 0x0000;
+
+const uint16_t ADDR_CARTRIDGE_TYPE = 0x0147;
+
+const uint8_t CARTRIDGE_TYPE_ROM_ONLY = 			0;
+const uint8_t CARTRIDGE_TYPE_ROM_MBC1 = 			1;
+const uint8_t CARTRIDGE_TYPE_ROM_MBC1_RAM = 		2;
+const uint8_t CARTRIDGE_TYPE_ROM_MBC1_RAM_BATT = 	3;
+const uint8_t CARTRIDGE_TYPE_ROM_MBC2 = 			5;
+const uint8_t CARTRIDGE_TYPE_ROM_MBC2_BATT = 		6;
+
+const uint16_t ADDR_ROM_SIZE = 0x0148;
+
+const std::map<uint8_t, uint8_t> ROM_SIZE_MAP = {
+	{0, 2},
+	{1, 4},
+	{2, 8},
+	{3, 16},
+	{4, 32},
+	{5, 64},
+	{6, 128},
+	{0x52, 72},
+	{0x53, 80},
+	{0x54, 96}
+};
+
+const uint16_t ADDR_RAM_SIZE = 0x0149;
+
+const std::map<uint8_t, uint8_t> RAM_SIZE_MAP = {
+	{0, 0},
+	{1, 1},
+	{2, 1},
+	{3, 4},
+	{4, 16},
+};
+
 const uint16_t ADDR_ROMBANK_1_START = 0x4000;
 
 const uint16_t ADDR_OAM_START = 				0xFE00;

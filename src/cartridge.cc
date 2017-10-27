@@ -25,10 +25,17 @@ void Cartridge::load(const std::string& fname){
 		return;
 	}
 	
+	file.seekg(ADDR_ROM_SIZE);
+	uint8_t rombanks = ROM_SIZE_MAP.at(file.peek());
+	m_mmu->allocate_rombanks(rombanks);
+	
+	file.seekg(ADDR_RAM_SIZE);
+	m_mmu->allocate_rambanks(RAM_SIZE_MAP.at(file.peek()));
+	
 	file.seekg(0x0);
-	m_mmu->write_stream(ADDR_ROMBANK_0_START, file, 0x4000);
-	m_mmu->write_stream(ADDR_ROMBANK_1_START, file, 0x4000);
-
+	for(uint8_t i = 0; i < rombanks; i++){
+		m_mmu->init_rombank(i, file);
+	}
 	file.close();
 }
 
